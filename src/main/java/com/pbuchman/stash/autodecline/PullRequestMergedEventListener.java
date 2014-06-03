@@ -1,6 +1,7 @@
 package com.pbuchman.stash.autodecline;
 
 import static com.atlassian.stash.pull.PullRequestState.OPEN;
+import static java.lang.String.format;
 
 import com.atlassian.event.api.AsynchronousPreferred;
 import com.atlassian.event.api.EventListener;
@@ -40,8 +41,14 @@ public class PullRequestMergedEventListener {
 			
 			if (mergeability.isConflicted()) {
 				pullRequestService.decline(repositoryId, pullRequest.getId(), pullRequest.getVersion());
+				pullRequestService.addComment(repositoryId, pullRequest.getId(), createDeclineComment(event.getPullRequest()));
 			}
 		}
+	}
+
+	private String createDeclineComment(PullRequest pullRequest) {
+		String message = format("This pull request has been automatically declined due to conflicts after merge of PR: '%s'", pullRequest.getTitle());
+		return message;
 	}
 
 }

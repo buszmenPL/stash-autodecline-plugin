@@ -2,6 +2,8 @@ package ut.com.pbuchman.stash.autodecline;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -73,6 +75,7 @@ public class PullRequestMergedEventListenerTest {
 		verify(pullRequestService).search(any(PullRequestSearchRequest.class), any(PageRequest.class));
 		verify(pullRequestService).canMerge(REPOSITORY_ID, PULL_REQUEST_ID);
 		verify(pullRequestService).decline(REPOSITORY_ID, PULL_REQUEST_ID, PULL_REQUEST_VERSION);
+		verify(pullRequestService).addComment(eq(REPOSITORY_ID), eq(PULL_REQUEST_ID), anyString());
 	}
 	
 	@Test
