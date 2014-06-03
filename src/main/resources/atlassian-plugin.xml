@@ -5,4 +5,7 @@
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
     </plugin-info>
 
+    <component-import key="pullRequestService" interface="com.atlassian.stash.pull.PullRequestService"/>
+    
+    <component key="PullRequestMergedEventListener" class="com.pbuchman.stash.autodecline.PullRequestMergedEventListener"/>
 </atlassian-plugin>

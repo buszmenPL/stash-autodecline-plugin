@@ -2,6 +2,7 @@ package com.pbuchman.stash.autodecline;
 
 import static com.atlassian.stash.pull.PullRequestState.OPEN;
 
+import com.atlassian.event.api.AsynchronousPreferred;
 import com.atlassian.event.api.EventListener;
 import com.atlassian.stash.event.pull.PullRequestMergedEvent;
 import com.atlassian.stash.pull.PullRequest;
@@ -12,6 +13,7 @@ import com.atlassian.stash.util.Page;
 import com.atlassian.stash.util.PageRequest;
 import com.atlassian.stash.util.PageRequestImpl;
 
+@AsynchronousPreferred
 public class PullRequestMergedEventListener {
 	
 	private final PullRequestService pullRequestService;
