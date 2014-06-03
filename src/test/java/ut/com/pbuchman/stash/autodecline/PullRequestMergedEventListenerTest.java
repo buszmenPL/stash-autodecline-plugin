@@ -79,6 +79,18 @@ public class PullRequestMergedEventListenerTest {
 	}
 	
 	@Test
+	public void shouldAddCommentWhenDecliningPullRequest() {
+		// given
+		when(mergeablity.isConflicted()).thenReturn(true);
+		
+		// when
+		listener.declineConflictedPullRequests(event);
+		
+		// then
+		verify(pullRequestService).addComment(eq(REPOSITORY_ID), eq(PULL_REQUEST_ID), anyString());
+	}
+	
+	@Test
 	public void shouldNotDeclineNotConflictedPullRequest() {
 		// given
 		when(mergeablity.isConflicted()).thenReturn(false);
