@@ -6,14 +6,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.pbuchman</groupId>
 	<artifactId>autodecline-stash-plugin</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT-${maven.build.timestamp}</version>
 
 	<organization>
 		<name>Piotr Buchman</name>
 		<url>http://pbuchman.com/</url>
 	</organization>
 
-	<name>Auto Decline Stash Plugin</name>
+	<name>AutoDecline Stash Plugin</name>
 	<description>This is the com.pbuchman:autodecline-stash-plugin plugin for Atlassian Stash.</description>
 	<packaging>atlassian-plugin</packaging>
 
@@ -22,6 +22,7 @@
 		<stash.data.version>3.0.1</stash.data.version>
 		<amps.version>4.2.20</amps.version>
 		<plugin.testrunner.version>1.1.4</plugin.testrunner.version>
+		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
 	</properties>
 
 	<dependencyManagement>
@@ -95,6 +96,16 @@
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.5</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>pl.pragmatists</groupId>
+			<artifactId>JUnitParams</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.easytesting</groupId>
+			<artifactId>fest-assert</artifactId>
+			<version>1.4</version>
 		</dependency>
 	</dependencies>
 

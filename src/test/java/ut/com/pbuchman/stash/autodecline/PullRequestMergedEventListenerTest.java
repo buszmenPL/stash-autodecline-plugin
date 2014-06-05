@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.atlassian.stash.event.pull.PullRequestMergedEvent;
+import com.atlassian.stash.i18n.I18nService;
+import com.atlassian.stash.nav.NavBuilder;
 import com.atlassian.stash.pull.PullRequest;
 import com.atlassian.stash.pull.PullRequestMergeability;
 import com.atlassian.stash.pull.PullRequestRef;
@@ -30,11 +32,17 @@ public class PullRequestMergedEventListenerTest {
 
 	private static final long PULL_REQUEST_ID = 19L;
 	private static final int PULL_REQUEST_VERSION = 66;
+	private static final String PULL_REQUEST_TITLE = "Pull Request Title";
+	private static final String PULL_REQUEST_URL = "https:\\\\domain.com\\projects\\PROJECT_1\\repos\\rep_1\\pull-requests\\1\\overview";
+	
 	private static final int REPOSITORY_ID = 45;
 	private static final String DEST_BRANCH_ID = "456";
 
 	@Mock
 	private PullRequestService pullRequestService;
+	
+	@Mock
+	private I18nService i18nService;
 	
 	@Mock
 	private PullRequestMergedEvent event;
@@ -53,6 +61,15 @@ public class PullRequestMergedEventListenerTest {
 	
 	@Mock
 	private PullRequestMergeability mergeablity;
+
+	@Mock
+	private NavBuilder navBuilder;
+	
+	@Mock
+	private NavBuilder.Repo navRepo;
+	
+	@Mock
+	private NavBuilder.PullRequest navPullRequest;
 	
 	private PullRequestMergedEventListener listener;
 	
@@ -60,7 +77,7 @@ public class PullRequestMergedEventListenerTest {
 	public void setup() {
 		initializeMocks();
 		
-		this.listener = new PullRequestMergedEventListener(pullRequestService);
+		this.listener = new PullRequestMergedEventListener(pullRequestService, i18nService, navBuilder);
 	}
 	
 	@Test
@@ -75,7 +92,6 @@ public class PullRequestMergedEventListenerTest {
 		verify(pullRequestService).search(any(PullRequestSearchRequest.class), any(PageRequest.class));
 		verify(pullRequestService).canMerge(REPOSITORY_ID, PULL_REQUEST_ID);
 		verify(pullRequestService).decline(REPOSITORY_ID, PULL_REQUEST_ID, PULL_REQUEST_VERSION);
-		verify(pullRequestService).addComment(eq(REPOSITORY_ID), eq(PULL_REQUEST_ID), anyString());
 	}
 	
 	@Test
@@ -107,8 +123,9 @@ public class PullRequestMergedEventListenerTest {
 	private void initializeMocks() {
 		when(event.getPullRequest()).thenReturn(pullRequest);
 		when(event.getRepository()).thenReturn(repository);
-		
+
 		when(pullRequest.getId()).thenReturn(PULL_REQUEST_ID);
+		when(pullRequest.getTitle()).thenReturn(PULL_REQUEST_TITLE);
 		when(pullRequest.getVersion()).thenReturn(PULL_REQUEST_VERSION);
 		when(pullRequest.getToRef()).thenReturn(destinationBranch);
 		
@@ -120,5 +137,9 @@ public class PullRequestMergedEventListenerTest {
 		
 		when(pullRequestService.search(any(PullRequestSearchRequest.class), any(PageRequest.class))).thenReturn(page);
 		when(pullRequestService.canMerge(REPOSITORY_ID, PULL_REQUEST_ID)).thenReturn(mergeablity);
+		
+		when(navBuilder.repo(repository)).thenReturn(navRepo);
+		when(navRepo.pullRequest(PULL_REQUEST_ID)).thenReturn(navPullRequest);
+		when(navPullRequest.buildAbsolute()).thenReturn(PULL_REQUEST_URL);
 	}
 }
