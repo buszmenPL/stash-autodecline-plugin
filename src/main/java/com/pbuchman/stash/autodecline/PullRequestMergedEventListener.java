@@ -1,6 +1,7 @@
 package com.pbuchman.stash.autodecline;
 
 import static com.atlassian.stash.pull.PullRequestState.OPEN;
+import static com.atlassian.stash.util.PageRequest.MAX_PAGE_LIMIT;
 
 import com.atlassian.event.api.EventListener;
 import com.atlassian.stash.event.pull.PullRequestMergedEvent;
@@ -16,6 +17,11 @@ import com.atlassian.stash.util.PageRequest;
 import com.atlassian.stash.util.PageRequestImpl;
 import com.pbuchman.stash.autodecline.technical.PullRequestTitleFormtter;
 
+/**
+ * Class responsible for handling {@link PullRequestMergedEvent}.
+ * 
+ * @author Piotr Buchman
+ */
 public class PullRequestMergedEventListener {
 
 	private final PullRequestService pullRequestService;
@@ -34,6 +40,12 @@ public class PullRequestMergedEventListener {
 		this.navBuilder = navBuilder;
 	}
 	
+	/**
+	 * Performs validation of open pull requests from repository and branch to which pull request associated with passed 
+	 * event was merged. Then declines all of them which are in conflicted state.
+	 *  
+	 * @param event that was raised by merge of pull request.
+	 */
 	@EventListener
 	public void declineConflictedPullRequests(PullRequestMergedEvent event) {
 		int repositoryId = event.getRepository().getId();
@@ -43,7 +55,7 @@ public class PullRequestMergedEventListener {
 				.toRepositoryId(repositoryId)
 				.state(OPEN)
 				.build();
-		PageRequest pageRequest = new PageRequestImpl(0, PageRequest.MAX_PAGE_LIMIT);
+		PageRequest pageRequest = new PageRequestImpl(0, MAX_PAGE_LIMIT);
 		
 		Page<PullRequest> pullRequests = pullRequestService.search(searchRequest, pageRequest);
 		
