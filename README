@@ -6,7 +6,7 @@ Every conflicted PR is automatically declined with relevant message.
 
 # Requirements
 
-This plugin requires Stash 2.9 to run. Upgrade or evaluate [Stash](http://www.atlassian.com/stash) today!
+This plugin requires Stash 2.7.6 to run. Upgrade or evaluate [Stash](http://www.atlassian.com/stash) today!
 
 # Want to contribute?
 Thanks! Please [fork this project](https://bitbucket.org/pbuchman/stash-autodecline-plugin) and create a pull request to submit changes back to the original project.

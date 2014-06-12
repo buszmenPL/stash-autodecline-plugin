@@ -1,5 +1,6 @@
 package ut.com.pbuchman.stash.autodecline;
 
+import static com.atlassian.stash.pull.PullRequestState.OPEN;
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -18,9 +19,10 @@ import com.atlassian.stash.event.pull.PullRequestMergedEvent;
 import com.atlassian.stash.i18n.I18nService;
 import com.atlassian.stash.nav.NavBuilder;
 import com.atlassian.stash.pull.PullRequest;
+import com.atlassian.stash.pull.PullRequestDirection;
 import com.atlassian.stash.pull.PullRequestMergeability;
+import com.atlassian.stash.pull.PullRequestOrder;
 import com.atlassian.stash.pull.PullRequestRef;
-import com.atlassian.stash.pull.PullRequestSearchRequest;
 import com.atlassian.stash.pull.PullRequestService;
 import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.util.Page;
@@ -89,7 +91,8 @@ public class PullRequestMergedEventListenerTest {
 		listener.declineConflictedPullRequests(event);
 		
 		// then
-		verify(pullRequestService).search(any(PullRequestSearchRequest.class), any(PageRequest.class));
+		verify(pullRequestService).findInDirection(any(PullRequestDirection.class), eq(REPOSITORY_ID), 
+				eq(DEST_BRANCH_ID), eq(OPEN), any(PullRequestOrder.class), any(PageRequest.class));
 		verify(pullRequestService).canMerge(REPOSITORY_ID, PULL_REQUEST_ID);
 		verify(pullRequestService).decline(REPOSITORY_ID, PULL_REQUEST_ID, PULL_REQUEST_VERSION);
 	}
@@ -115,7 +118,8 @@ public class PullRequestMergedEventListenerTest {
 		listener.declineConflictedPullRequests(event);
 		
 		// then
-		verify(pullRequestService).search(any(PullRequestSearchRequest.class), any(PageRequest.class));
+		verify(pullRequestService).findInDirection(any(PullRequestDirection.class), eq(REPOSITORY_ID), 
+				eq(DEST_BRANCH_ID), eq(OPEN), any(PullRequestOrder.class), any(PageRequest.class));
 		verify(pullRequestService).canMerge(REPOSITORY_ID, PULL_REQUEST_ID);
 		verifyNoMoreInteractions(pullRequestService);
 	}
@@ -135,7 +139,9 @@ public class PullRequestMergedEventListenerTest {
 		
 		when(page.getValues()).thenReturn(singletonList(pullRequest));
 		
-		when(pullRequestService.search(any(PullRequestSearchRequest.class), any(PageRequest.class))).thenReturn(page);
+
+		when(pullRequestService.findInDirection(any(PullRequestDirection.class), eq(REPOSITORY_ID), 
+				eq(DEST_BRANCH_ID), eq(OPEN), any(PullRequestOrder.class), any(PageRequest.class))).thenReturn(page);
 		when(pullRequestService.canMerge(REPOSITORY_ID, PULL_REQUEST_ID)).thenReturn(mergeablity);
 		
 		when(navBuilder.repo(repository)).thenReturn(navRepo);

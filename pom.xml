@@ -14,12 +14,12 @@
 	</organization>
 
 	<name>AutoDecline Stash Plugin</name>
-	<description>This is the com.pbuchman:autodecline-stash-plugin plugin for Atlassian Stash.</description>
+	<description>This is the com.pbuchman:stash-autodecline-plugin plugin for Atlassian Stash.</description>
 	<packaging>atlassian-plugin</packaging>
 
 	<properties>
-		<stash.version>3.0.1</stash.version>
-		<stash.data.version>3.0.1</stash.data.version>
+		<stash.version>2.7.6</stash.version>
+		<stash.data.version>2.7.6</stash.data.version>
 		<amps.version>4.2.20</amps.version>
 		<plugin.testrunner.version>1.1.4</plugin.testrunner.version>
 		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
@@ -73,8 +73,6 @@
 			<artifactId>commons-lang</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- WIRED TEST RUNNER DEPENDENCIES -->
 		<dependency>
 			<groupId>com.atlassian.plugins</groupId>
 			<artifactId>atlassian-plugins-osgi-testrunner</artifactId>
@@ -101,6 +99,7 @@
 			<groupId>pl.pragmatists</groupId>
 			<artifactId>JUnitParams</artifactId>
 			<version>1.0.2</version>
+			<scope></scope>
 		</dependency>
 		<dependency>
 			<groupId>org.easytesting</groupId>

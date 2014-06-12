@@ -1,5 +1,7 @@
 package com.pbuchman.stash.autodecline;
 
+import static com.atlassian.stash.pull.PullRequestDirection.INCOMING;
+import static com.atlassian.stash.pull.PullRequestOrder.NEWEST;
 import static com.atlassian.stash.pull.PullRequestState.OPEN;
 import static com.atlassian.stash.util.PageRequest.MAX_PAGE_LIMIT;
 
@@ -9,7 +11,6 @@ import com.atlassian.stash.i18n.I18nService;
 import com.atlassian.stash.nav.NavBuilder;
 import com.atlassian.stash.pull.PullRequest;
 import com.atlassian.stash.pull.PullRequestMergeability;
-import com.atlassian.stash.pull.PullRequestSearchRequest;
 import com.atlassian.stash.pull.PullRequestService;
 import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.util.Page;
@@ -49,15 +50,11 @@ public class PullRequestMergedEventListener {
 	@EventListener
 	public void declineConflictedPullRequests(PullRequestMergedEvent event) {
 		int repositoryId = event.getRepository().getId();
-		
-		PullRequestSearchRequest searchRequest = new PullRequestSearchRequest.Builder()
-				.toBranchId(event.getPullRequest().getToRef().getId())
-				.toRepositoryId(repositoryId)
-				.state(OPEN)
-				.build();
+		String branchId = event.getPullRequest().getToRef().getId();
 		PageRequest pageRequest = new PageRequestImpl(0, MAX_PAGE_LIMIT);
 		
-		Page<PullRequest> pullRequests = pullRequestService.search(searchRequest, pageRequest);
+		Page<PullRequest> pullRequests = pullRequestService.findInDirection(
+				INCOMING, repositoryId, branchId, OPEN, NEWEST, pageRequest);
 		
 		for (PullRequest pullRequest : pullRequests.getValues()) {
 			PullRequestMergeability mergeability = pullRequestService.canMerge(repositoryId, pullRequest.getId());
@@ -74,8 +71,9 @@ public class PullRequestMergedEventListener {
 	private String createDeclineComment(Repository repository, PullRequest pullRequest) {
 		String url = navBuilder.repo(repository).pullRequest(pullRequest.getId()).buildAbsolute();
 		String title = titleFormatter.format(pullRequest);
+		String fallbackMessage = "This pull request has been automatically declined due to conflicts.";
 		
-		String message = i18nService.getMessage("pullRequest.automaticallyDeclined", title, url); 
+		String message = i18nService.getText("pullRequest.automaticallyDeclined", fallbackMessage, title, url); 
 		return message;
 	}
 
