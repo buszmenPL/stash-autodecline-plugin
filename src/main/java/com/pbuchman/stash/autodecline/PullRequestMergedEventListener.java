@@ -5,6 +5,9 @@ import static com.atlassian.stash.pull.PullRequestOrder.NEWEST;
 import static com.atlassian.stash.pull.PullRequestState.OPEN;
 import static com.atlassian.stash.util.PageRequest.MAX_PAGE_LIMIT;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.atlassian.event.api.EventListener;
 import com.atlassian.stash.event.pull.PullRequestMergedEvent;
 import com.atlassian.stash.i18n.I18nService;
@@ -24,6 +27,8 @@ import com.pbuchman.stash.autodecline.technical.PullRequestTitleFormtter;
  * @author Piotr Buchman
  */
 public class PullRequestMergedEventListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(PullRequestMergedEventListener.class);
 
 	private final PullRequestService pullRequestService;
 	
@@ -51,19 +56,28 @@ public class PullRequestMergedEventListener {
 	public void declineConflictedPullRequests(PullRequestMergedEvent event) {
 		int repositoryId = event.getRepository().getId();
 		String branchId = event.getPullRequest().getToRef().getId();
+		
+		logger.debug("PR {} merged into repository: {}, branch: {}", event.getPullRequest().getId(), repositoryId, branchId);
+		
 		PageRequest pageRequest = new PageRequestImpl(0, MAX_PAGE_LIMIT);
 		
 		Page<PullRequest> pullRequests = pullRequestService.findInDirection(
 				INCOMING, repositoryId, branchId, OPEN, NEWEST, pageRequest);
 		
+		logger.debug("Found {} open PRs into repository: {}, branch: {}.", pullRequests.getSize(), repositoryId, branchId);
+		
 		for (PullRequest pullRequest : pullRequests.getValues()) {
 			PullRequestMergeability mergeability = pullRequestService.canMerge(repositoryId, pullRequest.getId());
 			
 			if (mergeability.isConflicted()) {
+				logger.debug("PR {} is conflicted, declining.", pullRequest.getId());
+				
 				pullRequestService.decline(repositoryId, pullRequest.getId(), pullRequest.getVersion());
 				
 				String comment = createDeclineComment(event.getRepository(), event.getPullRequest());
 				pullRequestService.addComment(repositoryId, pullRequest.getId(), comment);
+			} else {
+				logger.debug("PR {} is not conflicted, skipping.", pullRequest.getId());
 			}
 		}
 	}
