@@ -1,6 +1,7 @@
 # Stash AutoDecline Plugin
 
-Plugin responsible for declining pull requests that are in conflicted state. 
+Plugin responsible for automatic rejection of pull requests that are in conflicted state.
+ 
 It listens for event raised by change of Pull Request's scope and then verifies if it is conflicted. If yes, it gets declined.
 
 # Requirements
