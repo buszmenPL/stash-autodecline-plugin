@@ -13,16 +13,16 @@
 		<url>http://pbuchman.com/</url>
 	</organization>
 
-    <licenses>
-        <license>
-            <name>Apache License 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
 	<name>AutoDecline Stash Plugin</name>
-	<description>This is the com.pbuchman:stash-autodecline-plugin plugin for Atlassian Stash.</description>
+	<description>Plugin responsible for automatic rejection of pull requests that are in conflicted state.</description>
 	<packaging>atlassian-plugin</packaging>
 
 	<properties>
@@ -50,12 +50,12 @@
 			<groupId>com.atlassian.stash</groupId>
 			<artifactId>stash-api</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
@@ -64,7 +64,39 @@
 		</dependency>
 	</dependencies>
 
+
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.atlassian.maven.plugins</groupId>
+										<artifactId>maven-stash-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
+										<goals>
+											<goal>filter-test-plugin-descriptor</goal>
+											<goal>generate-manifest</goal>
+											<goal>compress-resources</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		
 		<plugins>
 			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
