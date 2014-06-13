@@ -9,7 +9,6 @@
 
     <component-import key="pullRequestService" interface="com.atlassian.stash.pull.PullRequestService"/>
     <component-import key="i18nService" interface="com.atlassian.stash.i18n.I18nService"/>
-    <component-import key="navBuilder" interface="com.atlassian.stash.nav.NavBuilder"/>
     
-    <component key="PullRequestMergedEventListener" class="com.pbuchman.stash.autodecline.PullRequestMergedEventListener"/>
+    <component key="PullRequestRescopedEventListener" class="com.pbuchman.stash.autodecline.PullRequestRescopedEventListener"/>
 </atlassian-plugin>
