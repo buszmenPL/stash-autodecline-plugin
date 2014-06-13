@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -17,11 +18,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.atlassian.stash.event.pull.PullRequestMergedEvent;
 import com.atlassian.stash.i18n.I18nService;
+import com.atlassian.stash.i18n.KeyedMessage;
 import com.atlassian.stash.nav.NavBuilder;
 import com.atlassian.stash.pull.PullRequest;
 import com.atlassian.stash.pull.PullRequestDirection;
 import com.atlassian.stash.pull.PullRequestMergeability;
 import com.atlassian.stash.pull.PullRequestOrder;
+import com.atlassian.stash.pull.PullRequestOutOfDateException;
 import com.atlassian.stash.pull.PullRequestRef;
 import com.atlassian.stash.pull.PullRequestService;
 import com.atlassian.stash.repository.Repository;
@@ -110,6 +113,28 @@ public class PullRequestMergedEventListenerTest {
 	}
 	
 	@Test
+	public void shouldFetchAgainOutOfDatedPullRequest() {
+		// given
+		KeyedMessage message = new KeyedMessage("key", "localisedMessage", "rootMessage");
+		PullRequest updatedPullRequest = mock(PullRequest.class);
+		int updatedVersion = 23;
+		
+		when(mergeablity.isConflicted()).thenReturn(true);
+		when(pullRequestService.decline(REPOSITORY_ID, PULL_REQUEST_ID, PULL_REQUEST_VERSION))
+			.thenThrow(new PullRequestOutOfDateException(message, new RuntimeException()));
+		when(pullRequestService.findById(REPOSITORY_ID, PULL_REQUEST_ID)).thenReturn(updatedPullRequest);
+		when(updatedPullRequest.getVersion()).thenReturn(updatedVersion);
+		
+		// when
+		listener.declineConflictedPullRequests(event);
+		
+		// then
+//		verify(pullRequestService).decline(REPOSITORY_ID, PULL_REQUEST_ID, PULL_REQUEST_VERSION);
+		verify(pullRequestService).findById(REPOSITORY_ID, PULL_REQUEST_ID);
+		verify(pullRequestService).decline(REPOSITORY_ID, PULL_REQUEST_ID, updatedVersion);
+	}
+	
+	@Test
 	public void shouldNotDeclineNotConflictedPullRequest() {
 		// given
 		when(mergeablity.isConflicted()).thenReturn(false);
@@ -125,20 +150,14 @@ public class PullRequestMergedEventListenerTest {
 	}
 	
 	private void initializeMocks() {
-		when(event.getPullRequest()).thenReturn(pullRequest);
-		when(event.getRepository()).thenReturn(repository);
-
-		when(pullRequest.getId()).thenReturn(PULL_REQUEST_ID);
-		when(pullRequest.getTitle()).thenReturn(PULL_REQUEST_TITLE);
-		when(pullRequest.getVersion()).thenReturn(PULL_REQUEST_VERSION);
-		when(pullRequest.getToRef()).thenReturn(destinationBranch);
+		mockEvent();
+		mockPullRequest();
 		
 		when(repository.getId()).thenReturn(REPOSITORY_ID);
 
 		when(destinationBranch.getId()).thenReturn(DEST_BRANCH_ID);
 		
 		when(page.getValues()).thenReturn(singletonList(pullRequest));
-		
 
 		when(pullRequestService.findInDirection(any(PullRequestDirection.class), eq(REPOSITORY_ID), 
 				eq(DEST_BRANCH_ID), eq(OPEN), any(PullRequestOrder.class), any(PageRequest.class))).thenReturn(page);
@@ -147,5 +166,17 @@ public class PullRequestMergedEventListenerTest {
 		when(navBuilder.repo(repository)).thenReturn(navRepo);
 		when(navRepo.pullRequest(PULL_REQUEST_ID)).thenReturn(navPullRequest);
 		when(navPullRequest.buildAbsolute()).thenReturn(PULL_REQUEST_URL);
+	}
+
+	private void mockEvent() {
+		when(event.getPullRequest()).thenReturn(pullRequest);
+		when(event.getRepository()).thenReturn(repository);
+	}
+
+	private void mockPullRequest() {
+		when(pullRequest.getId()).thenReturn(PULL_REQUEST_ID);
+		when(pullRequest.getTitle()).thenReturn(PULL_REQUEST_TITLE);
+		when(pullRequest.getVersion()).thenReturn(PULL_REQUEST_VERSION);
+		when(pullRequest.getToRef()).thenReturn(destinationBranch);
 	}
 }

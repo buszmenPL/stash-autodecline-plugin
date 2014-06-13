@@ -6,13 +6,21 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.pbuchman</groupId>
 	<artifactId>autodecline-stash-plugin</artifactId>
-	<version>1.0-SNAPSHOT-${maven.build.timestamp}</version>
+	<version>1.0-SNAPSHOT</version>
 
 	<organization>
 		<name>Piotr Buchman</name>
 		<url>http://pbuchman.com/</url>
 	</organization>
 
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    
 	<name>AutoDecline Stash Plugin</name>
 	<description>This is the com.pbuchman:stash-autodecline-plugin plugin for Atlassian Stash.</description>
 	<packaging>atlassian-plugin</packaging>

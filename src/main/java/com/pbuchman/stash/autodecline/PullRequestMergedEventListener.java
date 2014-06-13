@@ -14,6 +14,7 @@ import com.atlassian.stash.i18n.I18nService;
 import com.atlassian.stash.nav.NavBuilder;
 import com.atlassian.stash.pull.PullRequest;
 import com.atlassian.stash.pull.PullRequestMergeability;
+import com.atlassian.stash.pull.PullRequestOutOfDateException;
 import com.atlassian.stash.pull.PullRequestService;
 import com.atlassian.stash.repository.Repository;
 import com.atlassian.stash.util.Page;
@@ -57,31 +58,48 @@ public class PullRequestMergedEventListener {
 		int repositoryId = event.getRepository().getId();
 		String branchId = event.getPullRequest().getToRef().getId();
 		
-		logger.debug("PR {} merged into repository: {}, branch: {}", event.getPullRequest().getId(), repositoryId, branchId);
+		logger.info("PR {} merged into repository ID: {}, branch ID: {}", event.getPullRequest().getId(), repositoryId, branchId);
 		
 		PageRequest pageRequest = new PageRequestImpl(0, MAX_PAGE_LIMIT);
 		
 		Page<PullRequest> pullRequests = pullRequestService.findInDirection(
 				INCOMING, repositoryId, branchId, OPEN, NEWEST, pageRequest);
 		
-		logger.debug("Found {} open PRs into repository: {}, branch: {}.", pullRequests.getSize(), repositoryId, branchId);
+		logger.info("Found {} open PRs into repository ID: {}, branch ID: {}.", pullRequests.getSize(), repositoryId, branchId);
 		
 		for (PullRequest pullRequest : pullRequests.getValues()) {
 			PullRequestMergeability mergeability = pullRequestService.canMerge(repositoryId, pullRequest.getId());
 			
 			if (mergeability.isConflicted()) {
-				logger.debug("PR {} is conflicted, declining.", pullRequest.getId());
+				logger.info("PR {} into repository ID: {}, branch ID: {} is conflicted, declining.", pullRequest.getId(), repositoryId, branchId);
 				
-				pullRequestService.decline(repositoryId, pullRequest.getId(), pullRequest.getVersion());
-				
-				String comment = createDeclineComment(event.getRepository(), event.getPullRequest());
-				pullRequestService.addComment(repositoryId, pullRequest.getId(), comment);
+				tryToDecline(repositoryId, pullRequest);
+				explainWhyDeclined(event, repositoryId, pullRequest);
 			} else {
-				logger.debug("PR {} is not conflicted, skipping.", pullRequest.getId());
+				logger.info("PR {} into repository ID: {}, branch ID: {} is not conflicted, skipping.", pullRequest.getId(), repositoryId, branchId);
 			}
 		}
 	}
 
+	private void tryToDecline(int repositoryId, PullRequest pullRequest) {
+		try {
+			pullRequestService.decline(repositoryId, pullRequest.getId(), pullRequest.getVersion());
+		} catch (PullRequestOutOfDateException ex) {
+			logger.warn("Unable to decline pull request based on out-of-date information, updating.");
+			
+			PullRequest updatedPullRequest = pullRequestService.findById(repositoryId, pullRequest.getId());
+			int updatedVersion = updatedPullRequest.getVersion();
+			
+			pullRequestService.decline(repositoryId, pullRequest.getId(), updatedVersion);
+		}
+	}
+
+	private void explainWhyDeclined(PullRequestMergedEvent event, int repositoryId, PullRequest pullRequest) {
+		String comment = createDeclineComment(event.getRepository(), event.getPullRequest());
+		
+		pullRequestService.addComment(repositoryId, pullRequest.getId(), comment);
+	}
+	
 	private String createDeclineComment(Repository repository, PullRequest pullRequest) {
 		String url = navBuilder.repo(repository).pullRequest(pullRequest.getId()).buildAbsolute();
 		String title = titleFormatter.format(pullRequest);
