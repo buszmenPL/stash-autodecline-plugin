@@ -3,6 +3,9 @@
         <description>${project.description}</description>
         <version>${project.version}</version>
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
+        
+        <param name="plugin-icon">images/logo.png</param>
+        <param name="plugin-logo">images/logo.png</param>
     </plugin-info>
 
     <resource type="i18n" name="AutoDecline Messages" location="messages" />

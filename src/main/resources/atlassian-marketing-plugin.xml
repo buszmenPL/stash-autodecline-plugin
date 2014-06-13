@@ -1,0 +1,11 @@
+<atlassian-plugin-marketing>
+	<compatibility>
+		<product name="stash" min="2.7.6" max="3.0.1" />
+	</compatibility>
+	
+	<logo image="images/logo.png" />
+	
+	<screenshots>
+		<screenshot image="images/screenshot.jpg" />
+	</screenshots>
+</atlassian-plugin-marketing>
